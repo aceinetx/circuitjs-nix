@@ -12,13 +12,28 @@
     }:
     let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
+
+      desktopItem = pkgs.makeDesktopItem {
+        name = "circuitjs";
+        desktopName = "CircuitJS";
+        genericName = "Circuit simulator";
+        comment = "Electronic circuit simulator";
+        exec = "circuitjs1";
+        terminal = false;
+        type = "Application";
+        categories = [
+          "Education"
+          "Science"
+          "Engineering"
+        ];
+      };
     in
     {
       packages.x86_64-linux.default = pkgs.stdenv.mkDerivation {
         name = "circuitjs";
         version = "2026.08.02";
         src = pkgs.fetchurl {
-          url = "https://www.falstad.com/circuit/offline/circuitjs1-linux64.tgz";
+          url = "https://github.com/aceinetx/circuitjs-nix/releases/download/2026.08.02/circuitjs1-linux64.tgz";
           hash = "sha256-oVH+LVSggGKtaIkVZK05Ctyf7euLTlsQzSOY6cfX3HE=";
         };
 
@@ -52,10 +67,13 @@
             ];
           in
           ''
-            mkdir -p $out/bin
-            cp * $out/bin -r
-            mv $out/bin/circuitjs1 $out/bin/circuitjs1-real
+            mkdir -p "$out/bin"
+            cp * "$out/bin" -r
+            mv "$out/bin/circuitjs1" "$out/bin/circuitjs1-real"
             makeWrapper "$out/bin/circuitjs1-real" "$out/bin/circuitjs1" --set LD_LIBRARY_PATH "${libPath}"
+
+            mkdir -p "$out/share/applications"
+            cp "${desktopItem}/share/applications/circuitjs.desktop" "$out/share/applications"
           '';
       };
     };
